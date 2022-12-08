@@ -1,25 +1,43 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import Album from './Album'
+import AlbumCreate from './dashboard/AlbumCreate'
+import SongCreate from './dashboard/SongCreate'
+import MusicPlayer from './MusicPlayer'
+import Home from './Home'
+import { connect } from 'react-redux'
+import Login from './Login'
+import Register from './Register'
+import Playlist from './Playlist'
 
-function App() {
+const App = ({ PlayerData }) => {
+
+  const PrivateRoute = ({ children }) => {
+    const location = useLocation()
+    const accessToken = localStorage.getItem('accessToken')
+    return accessToken ? children : <Navigate to="/login" replace state={{ from: location}} />;
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <div>
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/album/:id' element={<PrivateRoute><Album /></PrivateRoute>} />
+          <Route path='/playlist/:id' element={<PrivateRoute><Playlist /></PrivateRoute>} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
+          <Route path='/dashboard/album/create' element={<AlbumCreate />} />
+          <Route path='/dashboard/song/create' element={<PrivateRoute><SongCreate /></PrivateRoute>} />
+        </Routes>
+      </BrowserRouter>
+      {PlayerData.length > 0 ? <MusicPlayer /> : ''}
+    </div >
+  )
 }
 
-export default App;
+const mapStateToProps = state => ({
+  PlayerData: state.PlayerData,
+})
+
+export default connect(mapStateToProps)(App)
